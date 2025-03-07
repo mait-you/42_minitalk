@@ -1,39 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_atoi.c                                          :+:      :+:    :+:   */
+/*   ft_memset.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mait-you <mait-you@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/22 20:12:59 by mait-you          #+#    #+#             */
-/*   Updated: 2025/03/06 21:19:12 by mait-you         ###   ########.fr       */
+/*   Created: 2024/10/21 16:25:38 by mait-you          #+#    #+#             */
+/*   Updated: 2024/11/14 09:09:42 by mait-you         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_atoi(const char *str, int *error)
+void	*ft_memset(void *b, int c, size_t len)
 {
-	int		i;
-	long	r;
+	unsigned char	*ptr;
 
-	i = 0;
-	r = 0;
-	if (str[i] == '-' || str[i] == '+')
-	{
-		if (str[i] == '-')
-			return (*error = 1);
-		i++;
-	}
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		*error = 0;
-		r = r * 10 + (str[i] - '0');
-		if ((r > INT_MAX))
-			return (*error = 1);
-		i++;
-	}
-	if ((str[i] && (str[i] < '0' || str[i] > '9')))
-		return (*error = 1);
-	return ((int)r);
+	ptr = (unsigned char *)b;
+	while (len-- > 0)
+		*(ptr++) = (unsigned char)c;
+	return (b);
 }

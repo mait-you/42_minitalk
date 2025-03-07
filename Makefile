@@ -6,7 +6,7 @@
 #    By: mait-you <mait-you@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/12 18:30:46 by mait-you          #+#    #+#              #
-#    Updated: 2025/03/03 21:23:46 by mait-you         ###   ########.fr        #
+#    Updated: 2025/03/06 20:50:25 by mait-you         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,7 +28,7 @@ NAME_2_B	:= client_bonus
 LIBFT		:= $(LIBFT_DIR)/libft.a
 
 ### Source Files 
-LIBFT_SRCS	:= $(LIBFT_DIR)/ft_atoi.c $(LIBFT_DIR)/ft_putendl_fd.c
+LIBFT_SRCS	:= $(LIBFT_DIR)/ft_atoi.c $(LIBFT_DIR)/ft_putendl_fd.c $(LIBFT_DIR)/ft_memset.c
 
 BONUS_SRCS	:= bonus/minitalk_utils_bonus.c
 

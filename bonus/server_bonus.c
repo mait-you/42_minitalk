@@ -6,11 +6,13 @@
 /*   By: mait-you <mait-you@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/01 12:51:30 by mait-you          #+#    #+#             */
-/*   Updated: 2025/03/03 21:38:17 by mait-you         ###   ########.fr       */
+/*   Updated: 2025/03/07 09:23:52 by mait-you         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk_bonus.h"
+
+static t_receiver	g_receiver;
 
 static int	get_byte_str_size(unsigned char byte)
 {
@@ -23,64 +25,57 @@ static int	get_byte_str_size(unsigned char byte)
 	return (1);
 }
 
-static int	print_byte(
-	unsigned char *byte, pid_t client_pid, int *byte_str_count
-	)
+static int	print_byte(unsigned char current_byte)
 {
-	static int				byte_str_size;
-	static unsigned char	byte_str[8];
-
-	if (*byte_str_count == 0)
-		byte_str_size = get_byte_str_size(*byte);
-	if (*byte == 0)
-		return (write(1, "\n", 1), kill(client_pid, SIGUSR1));
-	byte_str[(*byte_str_count)++] = *byte;
-	if (*byte_str_count == byte_str_size)
+	if (g_receiver.bit2_count == 0)
+		g_receiver.unicode_size = get_byte_str_size(current_byte);
+	if (g_receiver.current_byte == 0)
+		return (write(1, "\n", 1), kill(g_receiver.client_pid, SIGUSR1));
+	g_receiver.unicode_ptr[g_receiver.bit2_count++] = g_receiver.current_byte;
+	if (g_receiver.bit2_count == g_receiver.unicode_size)
 	{
-		write(1, byte_str, byte_str_size);
-		*byte_str_count = 0;
-		byte_str_size = 0;
+		g_receiver.unicode_ptr[g_receiver.unicode_size] = 0;
+		write(1, g_receiver.unicode_ptr, g_receiver.unicode_size);
+		g_receiver.bit2_count = 0;
+		g_receiver.unicode_size = 0;
 	}
-	return ((*byte = 0));
+	return ((g_receiver.current_byte = 0));
 }
 
-static void	get_signal(int signal, siginfo_t *siginfo, void *moreinfo)
+static void	handle_client_signal(int signal, siginfo_t *siginfo, void *moreinfo)
 {
-	static unsigned char	byte;
-	static int				bit_count;
-	static pid_t			client_pid;
-	static int				byte_str_count;
-
 	(void)moreinfo;
-	if (client_pid == 0 || client_pid != siginfo->si_pid)
+	if (g_receiver.client_pid == 0 || g_receiver.client_pid != siginfo->si_pid)
 	{
-		client_pid = siginfo->si_pid;
-		bit_count = 0;
-		byte = 0;
-		byte_str_count = 0;
+		ft_memset(&g_receiver, 0, sizeof(g_receiver));
+		g_receiver.client_pid = siginfo->si_pid;
 	}
-	byte <<= 1;
+	g_receiver.current_byte <<= 1;
 	if (signal == SIGUSR1)
-		byte |= 1;
-	bit_count++;
-	if (bit_count == 8)
+		g_receiver.current_byte |= 1;
+	g_receiver.bit1_count++;
+	if (g_receiver.bit1_count == 8)
 	{
-		print_byte(&byte, client_pid, &byte_str_count);
-		bit_count = 0;
+		print_byte(g_receiver.current_byte);
+		g_receiver.bit1_count = 0;
 	}
 }
 
 int	main(void)
 {
-	struct sigaction	signal;
+	struct sigaction	sa;
 
+	ft_memset(&g_receiver, 0, sizeof(g_receiver));
 	write(1, "Server PID: ", 13);
 	put_process_id(getpid());
 	write(1, "\n", 1);
-	signal.sa_sigaction = get_signal;
-	signal.sa_flags = SA_SIGINFO;
-	if (sigaction(SIGUSR1, &signal, NULL) == -1
-		|| sigaction(SIGUSR2, &signal, NULL) == -1)
+	sa.sa_sigaction = handle_client_signal;
+	sa.sa_flags = SA_SIGINFO;
+	sigemptyset(&sa.sa_mask);
+	sigaddset(&sa.sa_mask, SIGUSR1);
+	sigaddset(&sa.sa_mask, SIGUSR2);
+	if (sigaction(SIGUSR1, &sa, NULL) == -1
+		|| sigaction(SIGUSR2, &sa, NULL) == -1)
 		error_cleanup("Failed to set up signal handlers");
 	while (1)
 		pause();

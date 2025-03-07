@@ -6,7 +6,7 @@
 /*   By: mait-you <mait-you@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 19:41:23 by mait-you          #+#    #+#             */
-/*   Updated: 2025/03/03 21:18:15 by mait-you         ###   ########.fr       */
+/*   Updated: 2025/03/06 17:34:37 by mait-you         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,5 +29,12 @@ int	put_process_id(pid_t pid)
 		put_process_id(pid / 10);
 	nb = base[pid % 10];
 	write(1, &nb, 1);
+	return (0);
+}
+
+int	ft_kill(pid_t pid, int signal)
+{
+	if (kill(pid, signal) == -1)
+		error_cleanup("Failed to send signal");
 	return (0);
 }
